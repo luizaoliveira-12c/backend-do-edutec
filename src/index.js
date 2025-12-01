@@ -1,57 +1,73 @@
-import express, { request, response } from "express"
-import cors from "cors"
-import mysql2 from "mysql2"
+const express = require('express');
+const app = express();
+const PORT = 5500;
+const cors = require('cors'); 
 
-const { DB_HOST, DB_NAME, DB_USER, DB_PASSWORD} = process.env
+// Array de usuários para simular o Banco de Dados (Usuários persistem enquanto o servidor estiver rodando)
+const users = []; 
 
-const app = express ()
-const port = 3333
+// Middlewares
+app.use(express.json()); 
+app.use(cors()); 
 
-app.use(cors())
-app.use(express.json())
 
-app.get("/", (request, response) =>{
-    const selectCommand = "SELECT name, email FROM luizarocha_02mb"
+// ===============================================
+// Rota de CADASTRO (POST /cadastro)
+// ===============================================
+app.post('/cadastro', (req, res) => {
+    const { email, senha } = req.body;
+    
+    // Verifica se o email já existe
+    const existingUser = users.find(user => user.email === email);
+    
+    if (existingUser) {
+        return res.status(409).json({ 
+            message: "Este e-mail já está cadastrado. Tente fazer login." 
+        });
+    }
 
-    database.query(selectCommand, (error, users) =>{
-        if (error){
-            console.log(error)
-            return
-        }
+    // Adiciona o novo usuário
+    const newUser = { email, senha };
+    users.push(newUser);
+    
+    console.log(`[CADASTRO] Novo usuário cadastrado: ${email}. Total: ${users.length}`);
+    
+    // Retorna 201 Created
+    res.status(201).json({ 
+        message: "Usuário cadastrado com sucesso!" 
+    });
+});
 
-        response.json(users)
-    })
-})
 
-app.post("/cadastrar", (request, response) =>{
-    const {user} = request.body
-    console.log (user)
+// ===============================================
+// Rota de LOGIN (POST /login)
+// ===============================================
+app.post('/login', (req, res) => {
+    const { email, senha } = req.body;
+    
+    // Procura o usuário no "banco de dados"
+    const foundUser = users.find(user => 
+        user.email === email && user.senha === senha
+    );
 
-    const insertCommand=`
-    INSERT INTO luizarocha_02mb (name, email, password)
-    VALUES (?, ?, ?)
-    `
+    if (foundUser) {
+        console.log(`[LOGIN] Sucesso para: ${email}`);
+        // Retorna 200 OK
+        return res.status(200).json({ 
+            message: "Login bem-sucedido.", 
+            user: { email: foundUser.email }
+        });
+    } else {
+        console.log(`[LOGIN] Falha para: ${email}`);
+        // Retorna 401 Unauthorized
+        return res.status(401).json({ 
+            message: "E-mail ou senha incorretos." 
+        });
+    }
+});
 
-    database.query (insertCommand, [user.name, user.email, user.password], (error) =>{
-        if (error){
-            console.log(error)
-            return
-        } 
 
-    response.status(201).json({message: "Usuário cadastrado com sucesso!"})
-    })
-})
-
-app.listen(port, () =>{
-    console.log(`Server running on port ${port}!`)
-})
-
-const database = mysql2.createPool({
-    host: DB_HOST,
-    database: DB_NAME,
-    user: DB_USER,
-    password: DB_PASSWORD,
-    connectionLimit: 11
-}
-
-)
+// Inicia o servidor
+app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
