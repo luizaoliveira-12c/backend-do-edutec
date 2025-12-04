@@ -99,7 +99,7 @@ app.post("/cadastrar", (request, response) => {
     console.log("Tentativa de cadastro:", user.email);
 
     const insertCommand = `
-        INSERT INTO pedrohenrique_02mb(name, email, password, score)
+        INSERT INTO luizarocha_02mb(name, email, password, score)
         VALUES (?, ?, ?, 0) 
     `;
 
