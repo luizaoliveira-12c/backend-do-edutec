@@ -51,7 +51,7 @@ database.getConnection((err, connection) => {
  * Objetivo: Listar todos os usuários (incluindo o score para o ranking).
  */
 app.get("/", (request, response) => {
-    const selectCommand = "SELECT name, email, score FROM pedrohenrique_02mb";
+    const selectCommand = "SELECT name, email, score FROM luizarocha_02mb";
 
     database.query(selectCommand, (error, users) => {
         if (error) {
@@ -70,7 +70,7 @@ app.get("/", (request, response) => {
 app.post("/login", (request, response) => {
     const { email, password } = request.body.user;
     
-    const selectCommand = "SELECT id, name, password, score FROM pedrohenrique_02mb WHERE email = ?";
+    const selectCommand = "SELECT id, name, password, score FROM luizarocha_02mb WHERE email = ?";
 
     database.query(selectCommand, [email], (error, user) => {
         if (error) {
